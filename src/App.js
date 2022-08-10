@@ -1,25 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import "./App.css";
+import ShowReferralLink from "./components/ShowReferralLink";
+import { db } from "./firebase-config";
+import { collection, getDocs } from "firebase/firestore";
+import GiveReferralLink from "./components/GiveReferralLink";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+   const [referralLinks, setReferralLinks] = useState([]);
+   const [linksLength, setLinksLength] = useState(0);
+   const linksCollectionRef = collection(db, "links");
+   useEffect(() => {
+      const getReferralLinks = async () => {
+         const data = await getDocs(linksCollectionRef);
+         setReferralLinks(
+            data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+         );
+         setLinksLength(referralLinks.length);
+      };
+      getReferralLinks();
+   }, []);
+
+   return (
+      <div>
+         {referralLinks.map((link) => {
+            return (
+               <div>
+                  {" "}
+                  <h1>Name: {link.linkName}</h1>
+                  <h1>Id: {link.linkNumber}</h1>
+               </div>
+            );
+         })}
+         <p>This is a placeholder</p>
+         <ShowReferralLink />
+         <GiveReferralLink
+            linksCollectionRef={linksCollectionRef}
+            linksLength={linksLength}
+         />
+      </div>
+   );
+};
 
 export default App;
